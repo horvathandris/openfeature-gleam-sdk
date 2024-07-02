@@ -1,5 +1,6 @@
 import gleam/dynamic.{type Dynamic}
 import gleam/option.{type Option}
+import evaluation_context.{type EvaluationContext}
 
 pub type Reason {
   Disabled
@@ -11,8 +12,6 @@ pub type Reason {
   Static
   Error
 }
-
-pub type EvaluationContext
 
 type GenericEvaluation(value) =
   fn(String, value, Option(EvaluationContext)) -> ResolutionDetails(value)
