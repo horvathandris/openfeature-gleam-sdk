@@ -1,27 +1,19 @@
-import provider.{type FeatureProvider}
-import persistent_term
-import gleam/option.{type Option, None, Some}
-import evaluation_context.{type EvaluationContext, empty_evaluation_context}
+import gleam/dict
+import gleam/io
+import gleam/option.{None}
+import providers/in_memory_provider.{in_memory_provider}
+import api
 
-const persistent_term_key = "openfeature_api"
+pub fn main() {
+  io.println("Hello from features!")
 
-fn default_api() {
-  API(None, empty_evaluation_context())
-}
+  let flags =
+    dict.new()
+    |> dict.insert("flag-1", True)
+  let provider = in_memory_provider(flags)
+  io.debug(provider.resolve_bool_evaluation("flag-1", False, None))
+  io.debug(provider.resolve_bool_evaluation("flag-2", True, None))
+  io.debug(provider.get_metadata())
 
-pub opaque type API {
-  API(provider: Option(FeatureProvider), context: EvaluationContext)
-}
-
-pub fn set_provider(provider: FeatureProvider) -> Nil {
-  let api = persistent_term.get(persistent_term_key, default_api())
-  let new_api = API(Some(provider), api.context)
-  persistent_term.put(persistent_term_key, new_api)
-  provider.initialize(api.context)
-}
-
-pub fn set_context(context: EvaluationContext) {
-  let api = persistent_term.get(persistent_term_key, default_api())
-  let new_api = API(api.provider, context)
-  persistent_term.put(persistent_term_key, new_api)
+  api.set_provider(provider)
 }
