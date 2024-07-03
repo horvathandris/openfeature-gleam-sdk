@@ -14,8 +14,9 @@ pub fn in_memory_provider(from: Dict(String, value)) {
     initialize: fn(context) {
       // print context on initialize
       io.debug(context)
-      Nil
+      Ok(Nil)
     },
+    shutdown: fn() { Nil },
     resolve_bool_evaluation: fn(flag, _default_value, _evaluation_context) {
       resolve_evaluation(flag, from, dynamic.bool)
     },
