@@ -6,10 +6,16 @@ import gleam/dict.{type Dict}
 import gleam/dynamic
 import metadata.{Metadata}
 import provider.{FeatureProvider}
+import gleam/io
 
 pub fn in_memory_provider(from: Dict(String, value)) {
   FeatureProvider(
     get_metadata: get_metadata,
+    initialize: fn(context) {
+      // print context on initialize
+      io.debug(context)
+      Nil
+    },
     resolve_bool_evaluation: fn(flag, _default_value, _evaluation_context) {
       resolve_evaluation(flag, from, dynamic.bool)
     },
