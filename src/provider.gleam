@@ -1,10 +1,9 @@
-import gleam/option.{type Option}
 import evaluation.{
   type BoolEvaluation, type DynamicEvaluation, type FloatEvaluation,
   type IntEvaluation, type StringEvaluation,
 }
-import metadata.{type Metadata}
 import evaluation_context.{type EvaluationContext}
+import metadata.{type Metadata}
 
 pub type FeatureProvider {
   FeatureProvider(

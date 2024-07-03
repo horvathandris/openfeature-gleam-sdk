@@ -1,6 +1,6 @@
+import evaluation_context.{type EvaluationContext}
 import gleam/dynamic.{type Dynamic}
 import gleam/option.{type Option}
-import evaluation_context.{type EvaluationContext}
 
 pub type Reason {
   Disabled
