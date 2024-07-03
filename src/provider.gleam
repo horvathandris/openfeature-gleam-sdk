@@ -7,7 +7,8 @@ import metadata.{type Metadata}
 
 pub type FeatureProvider {
   FeatureProvider(
-    initialize: fn(EvaluationContext) -> Nil,
+    initialize: fn(EvaluationContext) -> Result(Nil, Nil),
+    shutdown: fn() -> Nil,
     get_metadata: fn() -> Metadata,
     resolve_bool_evaluation: BoolEvaluation,
     resolve_string_evaluation: StringEvaluation,
