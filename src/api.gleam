@@ -1,5 +1,6 @@
-import evaluation_context.{type EvaluationContext, empty_evaluation_context}
+import evaluation_context.{type EvaluationContext, EvaluationContext}
 import gleam/option.{type Option, None, Some}
+import gleam/dict
 import provider.{type FeatureProvider}
 import metadata.{type Metadata}
 
@@ -8,7 +9,7 @@ const persistent_term_key = "openfeature_api"
 const domain_provider_key_prefix = "domain_provider__"
 
 fn default_api() {
-  API(None, empty_evaluation_context())
+  API(None, EvaluationContext(None, dict.new()))
 }
 
 pub opaque type API {
@@ -43,7 +44,7 @@ pub fn set_context(context: EvaluationContext) -> Nil {
 }
 
 @external(erlang, "persistent_term", "get")
-pub fn persistent_term_get(key: String, default_value: a) -> a
+fn persistent_term_get(key: String, default_value: a) -> a
 
 @external(erlang, "persistent_term", "put")
-pub fn persistent_term_put(key: String, value: a) -> Nil
+fn persistent_term_put(key: String, value: a) -> Nil

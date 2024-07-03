@@ -2,10 +2,6 @@ import gleam/dict.{type Dict}
 import gleam/dynamic.{type Dynamic}
 import gleam/option.{type Option, None, Some}
 
-pub fn empty_evaluation_context() {
-  EvaluationContext(None, dict.new())
-}
-
 pub type EvaluationContext {
   EvaluationContext(
     targeting_key: Option(String),
