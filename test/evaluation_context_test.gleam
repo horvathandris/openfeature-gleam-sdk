@@ -1,10 +1,10 @@
+import evaluation_context.{type EvaluationContext, EvaluationContext}
+import gleam/dict
+import gleam/dynamic
+import gleam/list
+import gleam/option.{None, Some}
 import gleeunit
 import gleeunit/should
-import gleam/option.{None, Some}
-import gleam/dict
-import gleam/list
-import gleam/dynamic
-import evaluation_context.{type EvaluationContext, EvaluationContext}
 
 pub fn main() {
   gleeunit.main()

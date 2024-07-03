@@ -4,9 +4,9 @@ import evaluation.{
 }
 import gleam/dict.{type Dict}
 import gleam/dynamic
+import gleam/io
 import metadata.{Metadata}
 import provider.{FeatureProvider}
-import gleam/io
 
 pub fn in_memory_provider(from: Dict(String, value)) {
   FeatureProvider(
