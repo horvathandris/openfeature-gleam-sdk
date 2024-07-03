@@ -2,7 +2,7 @@ import api
 import gleam/dict
 import gleam/io
 import gleam/option.{None}
-import providers/in_memory_provider.{in_memory_provider}
+import providers/in_memory.{in_memory_provider}
 
 pub fn main() {
   io.println("Hello from features!")
