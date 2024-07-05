@@ -1,14 +1,13 @@
-import evaluation.{
-  type ResolutionDetails, FlagNotFound, ResolutionError, ResolutionSuccess,
-  Static, TypeMismatch,
-}
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/io
-import metadata.{Metadata}
-import provider.{FeatureProvider}
+import openfeature/evaluation.{
+  type ResolutionDetails, FlagNotFound, ResolutionError, ResolutionSuccess,
+  Static, TypeMismatch,
+}
+import openfeature/provider.{FeatureProvider, Metadata}
 
-pub fn in_memory_provider(from: Dict(String, value)) {
+pub fn provider(from: Dict(String, value)) {
   FeatureProvider(
     get_metadata: get_metadata,
     initialize: fn(context) {

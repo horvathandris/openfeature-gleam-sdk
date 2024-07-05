@@ -1,21 +1,22 @@
-import evaluation_context.{type EvaluationContext, EvaluationContext}
-import gleam/option.{None}
 import gleam/dict
-import provider.{type FeatureProvider}
-import metadata.{type Metadata}
-import client.{type Client, Client, ClientMetadata, global_domain}
-import providers/noop.{no_op_provider}
+import gleam/option.{None}
+import openfeature/client.{type Client, Client, ClientMetadata}
+import openfeature/evaluation_context.{type EvaluationContext, EvaluationContext}
+import openfeature/provider.{type FeatureProvider, type Metadata}
+import openfeature/providers/no_op
 
 const persistent_term_key = "openfeature_api"
 
 const domain_provider_key_prefix = "domain_provider__"
 
+const global_domain = ""
+
 fn default_api() {
-  API(no_op_provider(), EvaluationContext(None, dict.new()))
+  API(no_op.provider(), EvaluationContext(None, dict.new()))
 }
 
 pub type API {
-  API(provider: FeatureProvider, context: EvaluationContext)
+  API(provider: provider.FeatureProvider, context: EvaluationContext)
 }
 
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {

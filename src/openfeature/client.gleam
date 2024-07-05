@@ -1,6 +1,4 @@
-import provider.{type FeatureProvider}
-
-pub const global_domain = ""
+import openfeature/provider.{type FeatureProvider}
 
 pub type Client {
   Client(provider: FeatureProvider, metadata: ClientMetadata)
