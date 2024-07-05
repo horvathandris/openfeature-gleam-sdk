@@ -3,38 +3,61 @@ import gleam/option.{type Option, None, Some}
 import gleam/dict
 import provider.{type FeatureProvider}
 import metadata.{type Metadata}
+import client.{type Client, Client, ClientMetadata, global_domain}
+import providers/noop.{no_op_provider}
 
 const persistent_term_key = "openfeature_api"
 
 const domain_provider_key_prefix = "domain_provider__"
 
 fn default_api() {
-  API(None, EvaluationContext(None, dict.new()))
+  API(no_op_provider(), EvaluationContext(None, dict.new()))
 }
 
-pub opaque type API {
-  API(provider: Option(FeatureProvider), context: EvaluationContext)
+pub type API {
+  API(provider: FeatureProvider, context: EvaluationContext)
 }
 
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
   let api = persistent_term_get(persistent_term_key, default_api())
-  let new_api = API(Some(provider), api.context)
+  let new_api = API(provider, api.context)
   persistent_term_put(persistent_term_key, new_api)
   provider.initialize(api.context)
 }
 
-pub fn get_provider_metadata() -> Option(Metadata) {
+fn get_provider() -> FeatureProvider {
   persistent_term_get(persistent_term_key, default_api()).provider
-  |> option.map(fn(provider: FeatureProvider) { provider.get_metadata() })
+}
+
+pub fn get_provider_metadata() -> Metadata {
+  persistent_term_get(persistent_term_key, default_api()).provider.get_metadata()
 }
 
 pub fn set_domain_provider(domain: String, provider: FeatureProvider) -> Nil {
   persistent_term_put(domain_provider_key_prefix <> domain, provider)
 }
 
+fn get_domain_provider(domain: String) -> FeatureProvider {
+  persistent_term_get(domain_provider_key_prefix <> domain, get_provider())
+}
+
 pub fn get_domain_provider_metadata(domain: String) -> Option(Metadata) {
   persistent_term_get(domain_provider_key_prefix <> domain, None)
   |> option.map(fn(provider: FeatureProvider) { provider.get_metadata() })
+}
+
+pub fn get_client() {
+  Client(provider: get_provider(), metadata: ClientMetadata(global_domain))
+}
+
+/// Initialise and retrieve a new client for the provided domain.
+/// If the domain has a corresponding provider registered, the client will use that provider.
+/// Otherwise, the global default provider is used.
+pub fn get_domain_client(domain: String) {
+  Client(
+    provider: get_domain_provider(domain),
+    metadata: ClientMetadata(domain),
+  )
 }
 
 pub fn set_context(context: EvaluationContext) -> Nil {
