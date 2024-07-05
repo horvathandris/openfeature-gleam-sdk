@@ -1,8 +1,9 @@
-import metadata.{type Metadata, Metadata}
-import provider.{type FeatureProvider, FeatureProvider}
-import evaluation.{Default, ResolutionSuccess}
+import openfeature/evaluation.{Default, ResolutionSuccess}
+import openfeature/provider.{
+  type FeatureProvider, type Metadata, FeatureProvider, Metadata,
+}
 
-pub fn no_op_provider() {
+pub fn provider() {
   FeatureProvider(
     get_metadata: get_metadata,
     initialize: fn(_context) { Ok(Nil) },

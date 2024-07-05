@@ -1,9 +1,8 @@
-import evaluation.{
+import openfeature/evaluation.{
   type BoolEvaluation, type DynamicEvaluation, type FloatEvaluation,
   type IntEvaluation, type StringEvaluation,
 }
-import evaluation_context.{type EvaluationContext}
-import metadata.{type Metadata}
+import openfeature/evaluation_context.{type EvaluationContext}
 
 pub type FeatureProvider {
   FeatureProvider(
@@ -16,4 +15,8 @@ pub type FeatureProvider {
     resolve_float_evaluation: FloatEvaluation,
     resolve_dynamic_evaluation: DynamicEvaluation,
   )
+}
+
+pub type Metadata {
+  Metadata(name: String)
 }
