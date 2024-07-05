@@ -15,5 +15,10 @@ pub fn main() {
   io.debug(provider.resolve_bool_evaluation("flag-2", True, None))
   io.debug(provider.get_metadata())
 
+  io.debug(api.get_provider_metadata())
+
   api.set_provider(provider)
+
+  io.debug(api.get_provider_metadata())
+  io.debug(api.get_domain_provider_metadata("some-domain"))
 }

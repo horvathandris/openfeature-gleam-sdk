@@ -41,9 +41,8 @@ fn get_domain_provider(domain: String) -> FeatureProvider {
   persistent_term_get(domain_provider_key_prefix <> domain, get_provider())
 }
 
-pub fn get_domain_provider_metadata(domain: String) -> Option(Metadata) {
-  persistent_term_get(domain_provider_key_prefix <> domain, None)
-  |> option.map(fn(provider: FeatureProvider) { provider.get_metadata() })
+pub fn get_domain_provider_metadata(domain: String) -> Metadata {
+  persistent_term_get(domain_provider_key_prefix <> domain, get_provider()).get_metadata()
 }
 
 pub fn get_client() {
