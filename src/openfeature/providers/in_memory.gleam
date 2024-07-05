@@ -143,22 +143,22 @@ fn evaluate_context_evaluator(
   evaluation_context context: EvaluationContext,
   decoder decoder: dynamic.Decoder(value),
 ) -> ResolutionDetails(value) {
-  evaluator(context)
-  |> fn(resolution_details) {
+  let resolution_details = evaluator(context)
+
+  decoder(resolution_details.value)
+  |> result.map(fn(val) {
     case resolution_details {
-      ResolutionSuccess(val, reason) ->
-        decoder(val) |> result.map(ResolutionSuccess(_, reason))
-      ResolutionError(val, reason, code, message) ->
-        decoder(val)
-        |> result.map(ResolutionError(_, reason, code, message))
+      ResolutionSuccess(_, reason) -> ResolutionSuccess(val, reason)
+      ResolutionError(_, reason, code, message) ->
+        ResolutionError(val, reason, code, message)
     }
-    |> result.unwrap(ResolutionError(
-      default_value,
-      evaluation.Error,
-      TypeMismatch,
-      "type mismatch",
-    ))
-  }
+  })
+  |> result.unwrap(ResolutionError(
+    default_value,
+    evaluation.Error,
+    TypeMismatch,
+    "type mismatch",
+  ))
 }
 
 fn resolve_dynamic_evaluation(
