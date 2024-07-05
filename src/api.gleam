@@ -1,5 +1,5 @@
 import evaluation_context.{type EvaluationContext, EvaluationContext}
-import gleam/option.{type Option, None, Some}
+import gleam/option.{None}
 import gleam/dict
 import provider.{type FeatureProvider}
 import metadata.{type Metadata}
