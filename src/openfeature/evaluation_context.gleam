@@ -9,6 +9,10 @@ pub type EvaluationContext {
   )
 }
 
+pub fn empty() {
+  EvaluationContext(None, dict.new())
+}
+
 pub fn get_attribute(
   evaluation_context: EvaluationContext,
   key: String,

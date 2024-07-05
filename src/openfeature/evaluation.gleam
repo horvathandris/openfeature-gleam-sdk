@@ -1,5 +1,4 @@
 import gleam/dynamic.{type Dynamic}
-import gleam/option.{type Option}
 import openfeature/evaluation_context.{type EvaluationContext}
 
 pub type Reason {
@@ -14,7 +13,7 @@ pub type Reason {
 }
 
 type GenericEvaluation(value) =
-  fn(String, value, Option(EvaluationContext)) -> ResolutionDetails(value)
+  fn(String, value, EvaluationContext) -> ResolutionDetails(value)
 
 pub type BoolEvaluation =
   GenericEvaluation(Bool)
@@ -33,7 +32,12 @@ pub type DynamicEvaluation =
 
 pub type ResolutionDetails(value) {
   ResolutionSuccess(value: value, reason: Reason)
-  ResolutionError(code: ErrorCode, message: String)
+  ResolutionError(
+    value: value,
+    reason: Reason,
+    code: ErrorCode,
+    message: String,
+  )
 }
 
 pub type ErrorCode {
