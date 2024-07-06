@@ -1,6 +1,7 @@
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/io
+import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import openfeature/evaluation.{
@@ -13,11 +14,25 @@ import openfeature/provider.{FeatureProvider, Metadata}
 pub type InMemoryFlag {
   InMemoryFlag(
     default_variant: String,
-    variants: Dict(String, dynamic.Dynamic),
+    variants: Variants,
     context_evaluator: Option(
       fn(EvaluationContext) -> ResolutionDetails(dynamic.Dynamic),
     ),
   )
+}
+
+pub type Variants =
+  InternalVariants
+
+type InternalVariants =
+  Dict(String, dynamic.Dynamic)
+
+pub fn new_variants(variants: List(#(String, a))) -> Variants {
+  variants
+  |> list.map(fn(key_and_value) {
+    #(key_and_value.0, dynamic.from(key_and_value.1))
+  })
+  |> dict.from_list
 }
 
 pub fn provider(from: Dict(String, InMemoryFlag)) {
