@@ -17,10 +17,9 @@ pub type API {
 }
 
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
+  persistent_term_put(global_provider_key, provider)
   let context =
     persistent_term_get(global_context_key, evaluation_context.empty())
-  let api = API(provider, context)
-  persistent_term_put(global_provider_key, api)
   provider.initialize(context)
 }
 
