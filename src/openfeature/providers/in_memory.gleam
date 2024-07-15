@@ -11,8 +11,8 @@ import openfeature/evaluation.{
 import openfeature/evaluation_context.{type EvaluationContext}
 import openfeature/provider.{FeatureProvider, Metadata}
 
-pub type InMemoryFlag {
-  InMemoryFlag(
+pub type Flag {
+  Flag(
     default_variant: String,
     variants: Variants,
     context_evaluator: Option(
@@ -22,9 +22,6 @@ pub type InMemoryFlag {
 }
 
 pub type Variants =
-  InternalVariants
-
-type InternalVariants =
   Dict(String, dynamic.Dynamic)
 
 pub fn new_variants(variants: List(#(String, a))) -> Variants {
@@ -35,7 +32,7 @@ pub fn new_variants(variants: List(#(String, a))) -> Variants {
   |> dict.from_list
 }
 
-pub fn provider(from: Dict(String, InMemoryFlag)) {
+pub fn provider(from: Dict(String, Flag)) {
   FeatureProvider(
     get_metadata: get_metadata,
     initialize: fn(context) {
@@ -92,7 +89,7 @@ fn get_metadata() {
 
 fn resolve_evaluation(
   flag: String,
-  flags: Dict(String, InMemoryFlag),
+  flags: Dict(String, Flag),
   default_value: value,
   evaluation_context: EvaluationContext,
   decoder: dynamic.Decoder(value),
@@ -108,7 +105,7 @@ fn resolve_evaluation(
 
 fn inner_resolve(
   flag: String,
-  flags: Dict(String, InMemoryFlag),
+  flags: Dict(String, Flag),
   default_value: value,
   evaluation_context: EvaluationContext,
   decoder: dynamic.Decoder(value),
