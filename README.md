@@ -22,7 +22,7 @@ import openfeature/providers/in_memory
 
 pub fn main() {
   let test_flag =
-    in_memory.InMemoryFlag(
+    in_memory.Flag(
       "off",
       dict.from_list([
         #("off", dynamic.from(False)),
@@ -59,7 +59,7 @@ Further documentation can be found at <https://hexdocs.pm/openfeature>.
 | ❌      | [Logging](#logging)             | Integrate with popular logging packages.                                                                                           |
 | ✅      | [Domains](#domains)             | Logically bind clients with providers.                                                                                             |
 | ❌      | [Eventing](#eventing)           | React to state changes in the provider or flag management system.                                                                  |
-| ⚠️      | [Shutdown](#shutdown)           | Gracefully clean up a provider during application shutdown.                                                                        |
+| ✅      | [Shutdown](#shutdown)           | Gracefully clean up a provider during application shutdown.                                                                        |
 | ⚠️      | [Extending](#extending)         | Extend OpenFeature with custom providers and hooks.                                                                                |
 
 <sub>Implemented: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
@@ -90,7 +90,13 @@ TODO
 
 ### Shutdown
 
-TODO
+The OpenFeature API provides a close function to perform a cleanup of all registered providers. This should only be called when your application is in the process of shutting down.
+
+```gleam
+import openfeature/api as openfeature
+
+openfeature.shutdown()
+```
 
 ## Extending
 

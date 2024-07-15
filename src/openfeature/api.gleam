@@ -1,4 +1,5 @@
-import gleam/dict
+import gleam/dict.{type Dict}
+import gleam/list
 import gleam/result
 import openfeature/client.{type Client, Client, ClientMetadata}
 import openfeature/domain
@@ -27,14 +28,18 @@ pub fn get_provider_metadata() -> Metadata {
   get_provider().get_metadata()
 }
 
-pub fn set_domain_provider(domain: String, provider: FeatureProvider) -> Nil {
+fn get_domain_provider_registry() -> Dict(String, FeatureProvider) {
   persistent_term_get(domain_provider_registry_key, dict.new())
+}
+
+pub fn set_domain_provider(domain: String, provider: FeatureProvider) -> Nil {
+  get_domain_provider_registry()
   |> dict.insert(domain, provider)
   |> persistent_term_put(domain_provider_registry_key, _)
 }
 
 fn get_domain_provider(domain: String) -> FeatureProvider {
-  persistent_term_get(domain_provider_registry_key, dict.new())
+  get_domain_provider_registry()
   |> dict.get(domain)
   |> result.unwrap(get_provider())
 }
@@ -61,8 +66,22 @@ pub fn set_context(context: EvaluationContext) -> Nil {
   persistent_term_put(global_context_key, context)
 }
 
+pub fn shutdown() {
+  get_domain_provider_registry()
+  |> dict.values
+  |> list.prepend(get_provider())
+  |> list.each(fn(provider: FeatureProvider) { provider.shutdown() })
+
+  persistent_term_erase(domain_provider_registry_key)
+  persistent_term_erase(global_provider_key)
+  persistent_term_erase(global_context_key)
+}
+
 @external(erlang, "persistent_term", "get")
 fn persistent_term_get(key: String, default_value: a) -> a
 
 @external(erlang, "persistent_term", "put")
 fn persistent_term_put(key: String, value: a) -> Nil
+
+@external(erlang, "persistent_term", "erase")
+fn persistent_term_erase(key: String) -> Bool
