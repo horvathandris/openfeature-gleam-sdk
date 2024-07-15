@@ -1,4 +1,5 @@
 import gleam/dynamic.{type Dynamic}
+import openfeature/domain.{type Domain}
 import openfeature/evaluation_context.{type EvaluationContext}
 import openfeature/provider.{type FeatureProvider}
 
@@ -7,14 +8,15 @@ pub type Client {
 }
 
 pub type ClientMetadata {
-  ClientMetadata(domain: String)
+  ClientMetadata(domain: Domain)
 }
 
-pub fn get_name(metadata: ClientMetadata) {
-  metadata.domain
+@deprecated("This exists for historical compatibility, use `get_domain` instead.")
+pub fn get_name(metadata: ClientMetadata) -> Domain {
+  get_domain(metadata)
 }
 
-pub fn get_domain(metadata: ClientMetadata) {
+pub fn get_domain(metadata: ClientMetadata) -> Domain {
   metadata.domain
 }
 

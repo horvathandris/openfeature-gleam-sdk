@@ -1,53 +1,55 @@
 import gleam/dict
-import gleam/option.{None}
+import gleam/result
 import openfeature/client.{type Client, Client, ClientMetadata}
+import openfeature/domain
 import openfeature/evaluation_context.{type EvaluationContext, EvaluationContext}
 import openfeature/provider.{type FeatureProvider, type Metadata}
 import openfeature/providers/no_op
 
-const persistent_term_key = "openfeature_api"
+const global_provider_key = "global_openfeature_provider"
 
-const domain_provider_key_prefix = "domain_provider__"
+const global_context_key = "global_openfeature_context"
 
-const global_domain = ""
-
-fn default_api() {
-  API(no_op.provider(), EvaluationContext(None, dict.new()))
-}
+const domain_provider_registry_key = "openfeature_domain_providers"
 
 pub type API {
   API(provider: provider.FeatureProvider, context: EvaluationContext)
 }
 
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
-  let api = persistent_term_get(persistent_term_key, default_api())
-  let new_api = API(provider, api.context)
-  persistent_term_put(persistent_term_key, new_api)
-  provider.initialize(api.context)
+  let context =
+    persistent_term_get(global_context_key, evaluation_context.empty())
+  let api = API(provider, context)
+  persistent_term_put(global_provider_key, api)
+  provider.initialize(context)
 }
 
 fn get_provider() -> FeatureProvider {
-  persistent_term_get(persistent_term_key, default_api()).provider
+  persistent_term_get(global_provider_key, no_op.provider())
 }
 
 pub fn get_provider_metadata() -> Metadata {
-  persistent_term_get(persistent_term_key, default_api()).provider.get_metadata()
+  get_provider().get_metadata()
 }
 
 pub fn set_domain_provider(domain: String, provider: FeatureProvider) -> Nil {
-  persistent_term_put(domain_provider_key_prefix <> domain, provider)
+  persistent_term_get(domain_provider_registry_key, dict.new())
+  |> dict.insert(domain, provider)
+  |> persistent_term_put(domain_provider_registry_key, _)
 }
 
 fn get_domain_provider(domain: String) -> FeatureProvider {
-  persistent_term_get(domain_provider_key_prefix <> domain, get_provider())
+  persistent_term_get(domain_provider_registry_key, dict.new())
+  |> dict.get(domain)
+  |> result.unwrap(get_provider())
 }
 
 pub fn get_domain_provider_metadata(domain: String) -> Metadata {
-  persistent_term_get(domain_provider_key_prefix <> domain, get_provider()).get_metadata()
+  get_domain_provider(domain).get_metadata()
 }
 
 pub fn get_client() {
-  Client(provider: get_provider(), metadata: ClientMetadata(global_domain))
+  Client(provider: get_provider(), metadata: ClientMetadata(domain.Global))
 }
 
 /// Initialise and retrieve a new client for the provided domain.
@@ -56,14 +58,12 @@ pub fn get_client() {
 pub fn get_domain_client(domain: String) {
   Client(
     provider: get_domain_provider(domain),
-    metadata: ClientMetadata(domain),
+    metadata: ClientMetadata(domain.Scoped(domain)),
   )
 }
 
 pub fn set_context(context: EvaluationContext) -> Nil {
-  let api = persistent_term_get(persistent_term_key, default_api())
-  let new_api = API(api.provider, context)
-  persistent_term_put(persistent_term_key, new_api)
+  persistent_term_put(global_context_key, context)
 }
 
 @external(erlang, "persistent_term", "get")

@@ -1,14 +1,14 @@
 name = "openfeature"
-version = "0.0.7"
+version = "0.1.0"
 description = "The Gleam SDK for the OpenFeature specification."
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "horvathandris", repo = "openfeature-gleam-sdk" }
-gleam = ">= 0.32.0"
+gleam = ">= 1.0.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 
 [dependencies]
-gleam_stdlib = "~> 0.34 or ~> 1.0"
+gleam_stdlib = "~> 0.30 or ~> 1.0"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"
