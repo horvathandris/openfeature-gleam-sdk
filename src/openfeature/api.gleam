@@ -12,10 +12,6 @@ const global_context_key = "global_openfeature_context"
 
 const domain_provider_registry_key = "openfeature_domain_providers"
 
-pub type API {
-  API(provider: provider.FeatureProvider, context: EvaluationContext)
-}
-
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
   persistent_term_put(global_provider_key, provider)
   let context =
