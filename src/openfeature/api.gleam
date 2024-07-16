@@ -49,7 +49,11 @@ pub fn get_domain_provider_metadata(domain: String) -> Metadata {
 }
 
 pub fn get_client() {
-  Client(provider: get_provider(), metadata: ClientMetadata(domain.Global))
+  Client(
+    provider: get_provider(),
+    metadata: ClientMetadata(domain.Global),
+    evaluation_context: evaluation_context.empty(),
+  )
 }
 
 /// Initialise and retrieve a new client for the provided domain.
@@ -59,6 +63,7 @@ pub fn get_domain_client(domain: String) {
   Client(
     provider: get_domain_provider(domain),
     metadata: ClientMetadata(domain.Scoped(domain)),
+    evaluation_context: evaluation_context.empty(),
   )
 }
 

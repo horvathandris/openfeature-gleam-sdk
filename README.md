@@ -66,11 +66,56 @@ Further documentation can be found at <https://hexdocs.pm/openfeature>.
 
 ### Providers
 
-TODO
+[Providers](https://openfeature.dev/docs/reference/concepts/provider) are an abstraction between a flag management system and the OpenFeature SDK. Look [here](https://openfeature.dev/ecosystem?instant_search%5BrefinementList%5D%5Btype%5D%5B0%5D=Provider&instant_search%5BrefinementList%5D%5Btechnology%5D%5B0%5D=Gleam) for a complete list of available providers. If the provider you're looking for hasn't been created yet, see the [develop a provider](#develop-a-provider) section to learn how to build it yourself.
+
+Once you've added a provider as a dependency, it can be registered with OpenFeature like this:
+
+```gleam
+import openfeature/api as openfeature
+
+openfeature.set_provider(my_provider())
+```
+
+In some situations, it may be beneficial to register multiple providers in the same application. This is possible using [domains](#domains), which is covered in more details below.
 
 ### Targeting
 
-TODO
+Sometimes, the value of a flag must consider some dynamic criteria about the application or user, such as the user's location, IP, email address, or the server's location. In OpenFeature, we refer to this as [targeting](https://openfeature.dev/specification/glossary#targeting). If the flag management system you're using supports targeting, you can provide the input data using the [evaluation context](https://openfeature.dev/docs/reference/concepts/evaluation-context).
+
+```gleam
+import gleam/dynamic
+import gleam/option.{None}
+import openfeature/api as openfeature
+import openfeature/client
+import openfeature/evaluation_context.{EvaluationContext}
+
+// set the global evaluation context
+openfeature.set_context(
+  evaluation_context.targetless([
+    #("region", dynamic.from("us-east-1-iah-1a")),
+  ])
+)
+
+// set the client evaluation context
+let my_app_client =
+  openfeature.get_domain_client("my-app")
+  |> client.set_context(
+    evaluation_context.targetless([
+      #("version",  dynamic.from("1.4.6")),
+    ])
+  )
+
+// set the invocation context
+client.resolve_bool_evaluation(
+  my_app_client,
+  "bool-flag",
+  False,
+  evaluation_context.targeted(
+    "userId:1234",
+    [#("company", dynamic.from("Wise"))]
+  ),
+)
+```
 
 ### Hooks
 
@@ -82,7 +127,21 @@ TODO
 
 ### Domains
 
-TODO
+Clients can be assigned to a domain. A domain is a logical identifier which can be used to associate clients with a particular provider. If a domain has no associated provider, the default provider is used.
+
+```gleam
+import openfeature/api as openfeature
+
+// registering the default provider
+openfeature.set_provider(local_provider())
+// registering a domain provider
+openfeature.set_domain_provider("cached-domain", cached_provider())
+
+// a client bound to the default provider
+openfeature.get_client()
+// a client bound to the cached provider
+openfeature.get_domain_client("cached-domain")
+```
 
 ### Eventing
 

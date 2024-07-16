@@ -4,7 +4,11 @@ import openfeature/evaluation_context.{type EvaluationContext}
 import openfeature/provider.{type FeatureProvider}
 
 pub type Client {
-  Client(provider: FeatureProvider, metadata: ClientMetadata)
+  Client(
+    provider: FeatureProvider,
+    metadata: ClientMetadata,
+    evaluation_context: EvaluationContext,
+  )
 }
 
 pub type ClientMetadata {
@@ -83,4 +87,12 @@ pub fn resolve_dynamic_evaluation(
     default_value,
     evaluation_context,
   )
+}
+
+pub fn set_context(
+  client: Client,
+  evaluation_context: EvaluationContext,
+) -> Client {
+  let Client(provider: provider, metadata: metadata, ..) = client
+  Client(provider, metadata, evaluation_context)
 }
