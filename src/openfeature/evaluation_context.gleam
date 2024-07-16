@@ -10,7 +10,18 @@ pub type EvaluationContext {
 }
 
 pub fn empty() {
-  EvaluationContext(None, dict.new())
+  EvaluationContext(targeting_key: None, attributes: dict.new())
+}
+
+pub fn targetless(attributes: List(#(String, Dynamic))) {
+  EvaluationContext(targeting_key: None, attributes: dict.from_list(attributes))
+}
+
+pub fn targeted(targeting_key: String, attributes: List(#(String, Dynamic))) {
+  EvaluationContext(
+    targeting_key: Some(targeting_key),
+    attributes: dict.from_list(attributes),
+  )
 }
 
 pub fn get_attribute(
