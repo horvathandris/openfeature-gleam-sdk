@@ -118,7 +118,7 @@ let my_app_client =
   )
 
 // set the invocation context
-client.resolve_bool_evaluation(
+client.get_bool_details(
   my_app_client,
   "bool-flag",
   False,
