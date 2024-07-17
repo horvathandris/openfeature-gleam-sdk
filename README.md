@@ -5,7 +5,7 @@
 
 [OpenFeature](https://openfeature.dev) is an open specification that provides a vendor-agnostic, community-driven API for feature flagging that works with your favorite feature flag management tool.
 
-This repository contains the unofficial SDK implementation of the specification for the [Gleam](https://gleam.run/) programming language.
+This repository contains the unofficial SDK implementation of the [specification](https://openfeature.dev/specification/) for the [Gleam](https://gleam.run/) programming language.
 
 ## 🚀 Quick start
 
