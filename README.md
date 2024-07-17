@@ -3,11 +3,24 @@
 [![Package Version](https://img.shields.io/hexpm/v/openfeature)](https://hex.pm/packages/openfeature)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/openfeature/)
 
-An SDK for the OpenFeature specification.
+[OpenFeature](https://openfeature.dev) is an open specification that provides a vendor-agnostic, community-driven API for feature flagging that works with your favorite feature flag management tool.
+
+This repository contains the unofficial SDK implementation of the specification for the [Gleam](https://gleam.run/) programming language.
+
+## 🚀 Quick start
+
+### Requirements
+
+- Gleam [1+](https://github.com/gleam-lang/gleam/releases/tag/v1.0.0)
+
+### Install
 
 ```sh
 gleam add openfeature
 ```
+
+### Usage
+
 ```gleam
 import gleam/bool
 import gleam/dict
@@ -21,29 +34,31 @@ import openfeature/evaluation_context
 import openfeature/providers/in_memory
 
 pub fn main() {
-  let test_flag =
+  // flags defined in memory
+  let v2_flag =
     in_memory.Flag(
-      "off",
-      dict.from_list([
+      default_variant: "off",
+      variants: dict.from_list([
         #("off", dynamic.from(False)),
         #("on", dynamic.from(True)),
       ]),
-      None,
+      context_evaluator: None,
     )
-  let flags = dict.from_list([#("test_flag", test_flag)])
-  let provider = in_memory.provider(flags)
-  let _ = openfeature.set_provider(provider)
-  // set global provider
+  let flags = dict.from_list([#("v2_enabled", v2_flag)])
 
-  io.println(
-    "`test_flag` evaluated to " <> bool.to_string(evaluate_flag("test_flag")),
-  )
-}
+  // configure a provider
+  let _ = openfeature.set_provider(in_memory.provider(flags))
 
-fn evaluate_flag(flag: String) -> Bool {
-  openfeature.get_client()
-  |> client.resolve_bool_evaluation(flag, False, evaluation_context.empty())
-  |> fn(details: ResolutionDetails(Bool)) { details.value }
+  // get a bool flag value
+  let flag_value = openfeature.get_client()
+    |> client.get_boolean_value(
+      flag: "v2_enabled",
+      default_value: False,
+      evaluation_context: evaluation_context.empty(),
+    )
+
+  // use the returned flag value
+  io.println("`v2_enabled` evaluated to: " <> bool.to_string(flag_value))
 }
 ```
 
