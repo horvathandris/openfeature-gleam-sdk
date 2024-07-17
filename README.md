@@ -50,12 +50,9 @@ pub fn main() {
   let _ = openfeature.set_provider(in_memory.provider(flags))
 
   // get a bool flag value
-  let flag_value = openfeature.get_client()
-    |> client.get_boolean_value(
-      flag: "v2_enabled",
-      default_value: False,
-      evaluation_context: evaluation_context.empty(),
-    )
+  let flag_value =
+    openfeature.get_client()
+    |> client.get_bool_value("v2_enabled", False, evaluation_context.empty())
 
   // use the returned flag value
   io.println("`v2_enabled` evaluated to: " <> bool.to_string(flag_value))
