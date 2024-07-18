@@ -177,9 +177,9 @@ To develop a provider, you need to create a new project and include the OpenFeat
 ```gleam
 import gleam/dynamic.{type Dynamic}
 import openfeature/evaluation_context.{type EvaluationContext}
-import openfeature/provider.{FeatureProvider}
+import openfeature/provider.{type FeatureProvider, FeatureProvider}
 
-pub fn my_provider() {
+pub fn my_provider() -> FeatureProvider {
   FeatureProvider(
     get_metadata: fn() { provider.Metadata("My Provider") },
     initialize: fn(evaluation_context: EvaluationContext) {
