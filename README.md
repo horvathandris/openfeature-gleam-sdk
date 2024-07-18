@@ -29,7 +29,6 @@ import gleam/io
 import gleam/option.{None}
 import openfeature/api as openfeature
 import openfeature/client
-import openfeature/evaluation.{type ResolutionDetails}
 import openfeature/evaluation_context
 import openfeature/providers/in_memory
 
@@ -173,7 +172,67 @@ openfeature.shutdown()
 
 ### Develop a provider
 
-TODO
+To develop a provider, you need to create a new project and include the OpenFeature SDK as a dependency. This can be a new repository ~~or included in the existing contrib repository available under the OpenFeature organization~~. You’ll then need to write the provider by exporting a function that returns a value of type `FeatureProvider`, exported by the OpenFeature SDK.
+
+```gleam
+import gleam/dynamic.{type Dynamic}
+import openfeature/evaluation_context.{type EvaluationContext}
+import openfeature/provider.{FeatureProvider}
+
+pub fn my_provider() {
+  FeatureProvider(
+    get_metadata: fn() { provider.Metadata("My Provider") },
+    initialize: fn(evaluation_context: EvaluationContext) {
+      // code to initialize your provider
+      todo
+    },
+    shutdown: fn() {
+      // code to shutdown your provider
+      todo
+    },
+    resolve_bool_evaluation: fn(
+      flag: String,
+      default_value: Bool,
+      evaluation_context: EvaluationContext,
+    ) {
+      // code to evaluate a boolean value
+      todo
+    },
+    resolve_string_evaluation: fn(
+      flag: String,
+      default_value: String,
+      evaluation_context: EvaluationContext,
+    ) {
+      // code to evaluate a string value
+      todo
+    },
+    resolve_int_evaluation: fn(
+      flag: String,
+      default_value: Int,
+      evaluation_context: EvaluationContext,
+    ) {
+      // code to evaluate an integer value
+      todo
+    },
+    resolve_float_evaluation: fn(
+      flag: String,
+      default_value: Float,
+      evaluation_context: EvaluationContext,
+    ) {
+      // code to evaluate a float value
+      todo
+    },
+    resolve_dynamic_evaluation: fn(
+      flag: String,
+      default_value: Dynamic,
+      evaluation_context: EvaluationContext,
+    ) {
+      // code to evaluate a dynamic value
+      todo
+    },
+  )
+}
+```
 
 ### Develop a hook
 
