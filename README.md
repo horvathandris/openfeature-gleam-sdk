@@ -211,7 +211,7 @@ pub fn my_provider() {
       default_value: Int,
       evaluation_context: EvaluationContext,
     ) {
-      // code to evaluate a integer value
+      // code to evaluate an integer value
       todo
     },
     resolve_float_evaluation: fn(
