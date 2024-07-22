@@ -10,6 +10,8 @@ import openfeature/provider.{type FeatureProvider, type Metadata}
 import openfeature/providers/no_op
 import worm
 
+const timeout = 10_000
+
 type APIMessage {
   Shutdown
   SetProvider(
@@ -59,7 +61,13 @@ fn init_api() {
 }
 
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
-  actor.call(get_api_subject(), SetProvider(_, domain.Global, provider), 1000)
+  process.try_call(
+    get_api_subject(),
+    SetProvider(_, domain.Global, provider),
+    timeout,
+  )
+  |> result.nil_error
+  |> result.flatten
 }
 
 fn set_provider_internal(
@@ -68,21 +76,18 @@ fn set_provider_internal(
   domain: Domain,
   provider: FeatureProvider,
 ) -> API {
+  provider.initialize(state.global_context)
+  |> actor.send(reply_with, _)
+
   let provider_registry =
     state.provider_registry
     |> dict.insert(domain, provider)
-
-  case domain {
-    domain.Global -> provider.initialize(state.global_context)
-    domain.Scoped(_) -> Ok(Nil)
-  }
-  |> actor.send(reply_with, _)
 
   API(provider_registry, state.global_context)
 }
 
 fn get_provider() -> FeatureProvider {
-  actor.call(get_api_subject(), GetProvider(_, domain.Global), 1000)
+  actor.call(get_api_subject(), GetProvider(_, domain.Global), timeout)
 }
 
 fn get_provider_internal(
@@ -106,13 +111,13 @@ pub fn set_domain_provider(domain: String, provider: FeatureProvider) -> Nil {
   actor.call(
     get_api_subject(),
     SetProvider(_, domain.Scoped(domain), provider),
-    1000,
+    timeout,
   )
   |> result.unwrap(Nil)
 }
 
 fn get_domain_provider(domain: String) -> FeatureProvider {
-  actor.call(get_api_subject(), GetProvider(_, domain.Scoped(domain)), 1000)
+  actor.call(get_api_subject(), GetProvider(_, domain.Scoped(domain)), timeout)
 }
 
 pub fn get_domain_provider_metadata(domain: String) -> Metadata {
