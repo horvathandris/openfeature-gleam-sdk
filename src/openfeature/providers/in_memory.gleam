@@ -4,9 +4,9 @@ import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
+import openfeature/error
 import openfeature/evaluation.{
-  type ResolutionDetails, FlagNotFound, ResolutionError, ResolutionSuccess,
-  Static, TypeMismatch,
+  type ResolutionDetails, ResolutionError, ResolutionSuccess, Static,
 }
 import openfeature/evaluation_context.{type EvaluationContext}
 import openfeature/provider.{FeatureProvider, Metadata}
@@ -98,7 +98,7 @@ fn resolve_evaluation(
   |> result.unwrap(ResolutionError(
     default_value,
     evaluation.Error,
-    evaluation.General,
+    error.General,
     "flag " <> flag <> " not found",
   ))
 }
@@ -131,7 +131,7 @@ fn inner_resolve(
               ResolutionError(
                 default_value,
                 evaluation.Error,
-                TypeMismatch,
+                error.TypeMismatch,
                 "type mismatch",
               )
           }
@@ -139,7 +139,7 @@ fn inner_resolve(
           ResolutionError(
             default_value,
             evaluation.Error,
-            evaluation.General,
+            error.General,
             "default variant "
               <> found_flag.default_variant
               <> " not found in variants",
@@ -168,7 +168,7 @@ fn evaluate_context_evaluator(
   |> result.unwrap(ResolutionError(
     default_value,
     evaluation.Error,
-    TypeMismatch,
+    error.TypeMismatch,
     "type mismatch",
   ))
 }
@@ -184,7 +184,7 @@ fn resolve_dynamic_evaluation(
       ResolutionError(
         default_value,
         evaluation.Error,
-        FlagNotFound,
+        error.FlagNotFound,
         "not found",
       )
   }

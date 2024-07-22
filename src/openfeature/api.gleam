@@ -1,47 +1,123 @@
 import gleam/dict.{type Dict}
+import gleam/erlang/process.{type Subject}
 import gleam/list
+import gleam/otp/actor
 import gleam/result
 import openfeature/client.{type Client, Client, ClientMetadata}
-import openfeature/domain
+import openfeature/domain.{type Domain}
 import openfeature/evaluation_context.{type EvaluationContext, EvaluationContext}
 import openfeature/provider.{type FeatureProvider, type Metadata}
 import openfeature/providers/no_op
+import worm
 
-const global_provider_key = "global_openfeature_provider"
+const timeout = 10_000
 
-const global_context_key = "global_openfeature_context"
+type APIMessage {
+  Shutdown
+  SetProvider(
+    reply_with: Subject(Result(Nil, Nil)),
+    domain: Domain,
+    provider: FeatureProvider,
+  )
+  GetProvider(reply_with: Subject(FeatureProvider), domain: Domain)
+  SetContext(evaluation_context: EvaluationContext)
+}
 
-const domain_provider_registry_key = "openfeature_domain_providers"
+type API {
+  API(
+    provider_registry: Dict(Domain, FeatureProvider),
+    global_context: EvaluationContext,
+  )
+}
+
+fn get_api_subject() -> Subject(APIMessage) {
+  worm.persist(init_api)
+}
+
+fn init_api() {
+  let initial_state = API(dict.new(), evaluation_context.empty())
+  let assert Ok(subject) =
+    actor.start(initial_state, fn(message: APIMessage, state: API) {
+      case message {
+        Shutdown -> {
+          shutdown_internal(state)
+          actor.Stop(process.Normal)
+        }
+
+        SetProvider(reply_with, domain, provider) ->
+          set_provider_internal(state, reply_with, domain, provider)
+          |> actor.continue
+
+        GetProvider(reply_with, domain) ->
+          get_provider_internal(state, reply_with, domain)
+          |> actor.continue
+
+        SetContext(evaluation_context) ->
+          set_context_internal(state, evaluation_context)
+          |> actor.continue
+      }
+    })
+  subject
+}
 
 pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
-  persistent_term_put(global_provider_key, provider)
-  let context =
-    persistent_term_get(global_context_key, evaluation_context.empty())
-  provider.initialize(context)
+  process.try_call(
+    get_api_subject(),
+    SetProvider(_, domain.Global, provider),
+    timeout,
+  )
+  |> result.nil_error
+  |> result.flatten
+}
+
+fn set_provider_internal(
+  state: API,
+  reply_with: Subject(Result(Nil, Nil)),
+  domain: Domain,
+  provider: FeatureProvider,
+) -> API {
+  provider.initialize(state.global_context)
+  |> actor.send(reply_with, _)
+
+  let provider_registry =
+    state.provider_registry
+    |> dict.insert(domain, provider)
+
+  API(provider_registry, state.global_context)
 }
 
 fn get_provider() -> FeatureProvider {
-  persistent_term_get(global_provider_key, no_op.provider())
+  actor.call(get_api_subject(), GetProvider(_, domain.Global), timeout)
+}
+
+fn get_provider_internal(
+  state: API,
+  reply_with: Subject(FeatureProvider),
+  domain: Domain,
+) -> API {
+  state.provider_registry
+  |> dict.get(domain)
+  |> result.unwrap(no_op.provider())
+  |> actor.send(reply_with, _)
+
+  state
 }
 
 pub fn get_provider_metadata() -> Metadata {
   get_provider().get_metadata()
 }
 
-fn get_domain_provider_registry() -> Dict(String, FeatureProvider) {
-  persistent_term_get(domain_provider_registry_key, dict.new())
-}
-
 pub fn set_domain_provider(domain: String, provider: FeatureProvider) -> Nil {
-  get_domain_provider_registry()
-  |> dict.insert(domain, provider)
-  |> persistent_term_put(domain_provider_registry_key, _)
+  actor.call(
+    get_api_subject(),
+    SetProvider(_, domain.Scoped(domain), provider),
+    timeout,
+  )
+  |> result.unwrap(Nil)
 }
 
 fn get_domain_provider(domain: String) -> FeatureProvider {
-  get_domain_provider_registry()
-  |> dict.get(domain)
-  |> result.unwrap(get_provider())
+  actor.call(get_api_subject(), GetProvider(_, domain.Scoped(domain)), timeout)
 }
 
 pub fn get_domain_provider_metadata(domain: String) -> Metadata {
@@ -67,26 +143,19 @@ pub fn get_domain_client(domain: String) {
   )
 }
 
-pub fn set_context(context: EvaluationContext) -> Nil {
-  persistent_term_put(global_context_key, context)
+fn set_context_internal(
+  state: API,
+  evaluation_context: EvaluationContext,
+) -> API {
+  API(state.provider_registry, evaluation_context)
 }
 
 pub fn shutdown() {
-  get_domain_provider_registry()
-  |> dict.values
-  |> list.prepend(get_provider())
-  |> list.each(fn(provider: FeatureProvider) { provider.shutdown() })
-
-  persistent_term_erase(domain_provider_registry_key)
-  persistent_term_erase(global_provider_key)
-  persistent_term_erase(global_context_key)
+  actor.send(get_api_subject(), Shutdown)
 }
 
-@external(erlang, "persistent_term", "get")
-fn persistent_term_get(key: String, default_value: a) -> a
-
-@external(erlang, "persistent_term", "put")
-fn persistent_term_put(key: String, value: a) -> Nil
-
-@external(erlang, "persistent_term", "erase")
-fn persistent_term_erase(key: String) -> Bool
+fn shutdown_internal(state: API) -> Nil {
+  state.provider_registry
+  |> dict.values
+  |> list.each(fn(provider) { provider.shutdown() })
+}

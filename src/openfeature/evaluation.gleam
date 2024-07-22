@@ -1,4 +1,5 @@
 import gleam/dynamic.{type Dynamic}
+import openfeature/error.{type ErrorCode}
 import openfeature/evaluation_context.{type EvaluationContext}
 
 pub type Reason {
@@ -38,14 +39,4 @@ pub type ResolutionDetails(value) {
     code: ErrorCode,
     message: String,
   )
-}
-
-pub type ErrorCode {
-  ProviderNotReady
-  FlagNotFound
-  ParseError
-  TypeMismatch
-  TargetingKeyMissing
-  InvalidContext
-  General
 }
