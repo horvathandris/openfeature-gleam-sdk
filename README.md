@@ -27,7 +27,7 @@ import gleam/dict
 import gleam/dynamic
 import gleam/io
 import gleam/option.{None}
-import openfeature/api as openfeature
+import openfeature
 import openfeature/client
 import openfeature/evaluation_context
 import openfeature/providers/in_memory
@@ -82,7 +82,7 @@ Further documentation can be found at <https://hexdocs.pm/openfeature>.
 Once you've added a provider as a dependency, it can be registered with OpenFeature like this:
 
 ```gleam
-import openfeature/api as openfeature
+import openfeature
 
 openfeature.set_provider(my_provider())
 ```
@@ -96,7 +96,7 @@ Sometimes, the value of a flag must consider some dynamic criteria about the app
 ```gleam
 import gleam/dynamic
 import gleam/option.{None}
-import openfeature/api as openfeature
+import openfeature
 import openfeature/client
 import openfeature/evaluation_context.{EvaluationContext}
 
@@ -141,7 +141,7 @@ TODO
 Clients can be assigned to a domain. A domain is a logical identifier which can be used to associate clients with a particular provider. If a domain has no associated provider, the default provider is used.
 
 ```gleam
-import openfeature/api as openfeature
+import openfeature
 
 // registering the default provider
 openfeature.set_provider(local_provider())
@@ -163,7 +163,7 @@ TODO
 The OpenFeature API provides a close function to perform a cleanup of all registered providers. This should only be called when your application is in the process of shutting down.
 
 ```gleam
-import openfeature/api as openfeature
+import openfeature
 
 openfeature.shutdown()
 ```

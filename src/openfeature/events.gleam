@@ -3,7 +3,7 @@ import gleam/dynamic.{type Dynamic}
 import gleam/option.{type Option}
 import openfeature/error.{type ErrorCode}
 
-type EventCallback =
+pub type EventCallback =
   fn(EventDetails) -> Nil
 
 type EventType {
@@ -23,8 +23,5 @@ type ProviderEventDetails {
 }
 
 type EventDetails {
-  EventDetails(
-    provider_name: String,
-    provider_event_details: ProviderEventDetails,
-  )
+  EventDetails(provider_name: String, event_details: ProviderEventDetails)
 }
