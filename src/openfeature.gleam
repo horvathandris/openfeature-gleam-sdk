@@ -95,7 +95,7 @@ fn set_provider_internal(
     state.provider_registry
     |> dict.insert(domain, provider)
 
-  API(provider_registry, state.global_context, state.event_callbacks)
+  API(..state, provider_registry: provider_registry)
 }
 
 fn get_provider() -> FeatureProvider {
@@ -159,7 +159,7 @@ fn set_context_internal(
   state: API,
   evaluation_context: EvaluationContext,
 ) -> API {
-  API(state.provider_registry, evaluation_context, state.event_callbacks)
+  API(..state, global_context: evaluation_context)
 }
 
 pub fn shutdown() {
@@ -183,9 +183,11 @@ fn add_handler_internal(
     |> result.unwrap([])
     |> list.prepend(callback)
 
-  state.event_callbacks
-  |> dict.insert(domain, domain_callbacks)
-  |> API(state.provider_registry, state.global_context, _)
+  let event_callbacks =
+    state.event_callbacks
+    |> dict.insert(domain, domain_callbacks)
+
+  API(..state, event_callbacks: event_callbacks)
 }
 
 fn remove_handler_internal(state: API, domain: Domain, callback: EventCallback) {
@@ -195,7 +197,9 @@ fn remove_handler_internal(state: API, domain: Domain, callback: EventCallback) 
     |> result.unwrap([])
     |> list.drop_while(fn(x) { x == callback })
 
-  state.event_callbacks
-  |> dict.insert(domain, domain_callbacks)
-  |> API(state.provider_registry, state.global_context, _)
+  let event_callbacks =
+    state.event_callbacks
+    |> dict.insert(domain, domain_callbacks)
+
+  API(..state, event_callbacks: event_callbacks)
 }
