@@ -95,7 +95,7 @@ fn set_provider_internal(
     state.provider_registry
     |> dict.insert(domain, provider)
 
-  API(..state, provider_registry: provider_registry)
+  API(..state, provider_registry:)
 }
 
 fn get_provider() -> FeatureProvider {
@@ -187,7 +187,7 @@ fn add_handler_internal(
     state.event_callbacks
     |> dict.insert(domain, domain_callbacks)
 
-  API(..state, event_callbacks: event_callbacks)
+  API(..state, event_callbacks:)
 }
 
 fn remove_handler_internal(state: API, domain: Domain, callback: EventCallback) {
@@ -201,5 +201,5 @@ fn remove_handler_internal(state: API, domain: Domain, callback: EventCallback) 
     state.event_callbacks
     |> dict.insert(domain, domain_callbacks)
 
-  API(..state, event_callbacks: event_callbacks)
+  API(..state, event_callbacks:)
 }
