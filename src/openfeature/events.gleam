@@ -6,14 +6,14 @@ import openfeature/error.{type ErrorCode}
 pub type EventCallback =
   fn(EventDetails) -> Nil
 
-type EventType {
+pub type EventType {
   ProviderReady
   ProviderError
   ProviderConfigurationChanged
   ProviderStale
 }
 
-type ProviderEventDetails {
+pub type ProviderEventDetails {
   ProviderEventDetails(
     flags_changed: Option(List(String)),
     message: Option(String),
@@ -22,6 +22,6 @@ type ProviderEventDetails {
   )
 }
 
-type EventDetails {
+pub type EventDetails {
   EventDetails(provider_name: String, event_details: ProviderEventDetails)
 }

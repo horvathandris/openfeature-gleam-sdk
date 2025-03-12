@@ -1,12 +1,13 @@
 import gleam/dict.{type Dict}
 import gleam/erlang/process.{type Subject}
 import gleam/list
+import gleam/option.{None}
 import gleam/otp/actor
 import gleam/result
 import openfeature/client.{type Client, Client, ClientMetadata}
 import openfeature/domain.{type Domain}
 import openfeature/evaluation_context.{type EvaluationContext, EvaluationContext}
-import openfeature/events.{type EventCallback}
+import openfeature/events.{type EventCallback, type EventDetails, type EventType}
 import openfeature/provider.{type FeatureProvider, type Metadata}
 import openfeature/providers/no_op
 import worm
@@ -22,15 +23,15 @@ type APIMessage {
   )
   GetProvider(reply_with: Subject(FeatureProvider), domain: Domain)
   SetContext(evaluation_context: EvaluationContext)
-  AddHandler(domain: Domain, callback: EventCallback)
-  RemoveHandler(domain: Domain, callback: EventCallback)
+  AddHandler(domain: Domain, event_type: EventType, callback: EventCallback)
+  RemoveHandler(domain: Domain, event_type: EventType, callback: EventCallback)
 }
 
 type API {
   API(
     provider_registry: Dict(Domain, FeatureProvider),
     global_context: EvaluationContext,
-    event_callbacks: Dict(Domain, List(EventCallback)),
+    event_callbacks: Dict(#(Domain, EventType), List(EventCallback)),
   )
 }
 
@@ -60,12 +61,12 @@ fn init_api() {
           set_context_internal(state, evaluation_context)
           |> actor.continue
 
-        AddHandler(domain, callback) ->
-          add_handler_internal(state, domain, callback)
+        AddHandler(domain, event_type, callback) ->
+          add_handler_internal(state, domain, event_type, callback)
           |> actor.continue
 
-        RemoveHandler(domain, callback) ->
-          remove_handler_internal(state, domain, callback)
+        RemoveHandler(domain, event_type, callback) ->
+          remove_handler_internal(state, domain, event_type, callback)
           |> actor.continue
       }
     })
@@ -91,9 +92,25 @@ fn set_provider_internal(
   let init_result = provider.initialize(state.global_context)
   actor.send(reply_with, init_result)
 
+  // todo: do we register if init failed
   let provider_registry =
     state.provider_registry
     |> dict.insert(domain, provider)
+
+  // todo: write tests for event callbacks
+  case init_result {
+    Ok(_) -> events.ProviderReady
+    Error(_) -> events.ProviderError
+  }
+  |> execute_callbacks(
+    state,
+    domain,
+    _,
+    events.EventDetails(
+      provider.get_metadata().name,
+      events.ProviderEventDetails(None, None, None, dict.new()),
+    ),
+  )
 
   API(..state, provider_registry:)
 }
@@ -175,31 +192,49 @@ fn shutdown_internal(state: API) -> Nil {
 fn add_handler_internal(
   state: API,
   domain: Domain,
+  event_type: EventType,
   callback: EventCallback,
 ) -> API {
   let domain_callbacks =
     state.event_callbacks
-    |> dict.get(domain)
+    |> dict.get(#(domain, event_type))
     |> result.unwrap([])
     |> list.prepend(callback)
 
   let event_callbacks =
     state.event_callbacks
-    |> dict.insert(domain, domain_callbacks)
+    |> dict.insert(#(domain, event_type), domain_callbacks)
 
   API(..state, event_callbacks:)
 }
 
-fn remove_handler_internal(state: API, domain: Domain, callback: EventCallback) {
+fn remove_handler_internal(
+  state: API,
+  domain: Domain,
+  event_type: EventType,
+  callback: EventCallback,
+) {
   let domain_callbacks =
     state.event_callbacks
-    |> dict.get(domain)
+    |> dict.get(#(domain, event_type))
     |> result.unwrap([])
     |> list.drop_while(fn(x) { x == callback })
 
   let event_callbacks =
     state.event_callbacks
-    |> dict.insert(domain, domain_callbacks)
+    |> dict.insert(#(domain, event_type), domain_callbacks)
 
   API(..state, event_callbacks:)
+}
+
+fn execute_callbacks(
+  state: API,
+  domain: Domain,
+  event_type: EventType,
+  event_details: EventDetails,
+) {
+  state.event_callbacks
+  |> dict.get(#(domain, event_type))
+  |> result.unwrap([])
+  |> list.each(fn(callback) { callback(event_details) })
 }
