@@ -11,7 +11,7 @@ This repository contains the unofficial SDK implementation of the [specification
 
 ### Requirements
 
-- Gleam [1+](https://github.com/gleam-lang/gleam/releases/tag/v1.0.0)
+- Gleam [1.4+](https://github.com/gleam-lang/gleam/releases/tag/v1.4.0)
 
 ### Install
 
@@ -62,16 +62,16 @@ Further documentation can be found at <https://hexdocs.pm/openfeature>.
 
 ## 🌟 Features
 
-| Status | Features                        | Description                                                                                                                        |
-| ------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| ✅      | [Providers](#providers)         | Integrate with a commercial, open source, or in-house feature management tool.                                                     |
-| ✅      | [Targeting](#targeting)         | Contextually-aware flag evaluation using [evaluation context](https://openfeature.dev/docs/reference/concepts/evaluation-context). |
-| ❌      | [Hooks](#hooks)                 | Add functionality to various stages of the flag evaluation life-cycle.                                                             |
-| ❌      | [Logging](#logging)             | Integrate with popular logging packages.                                                                                           |
-| ✅      | [Domains](#domains)             | Logically bind clients with providers.                                                                                             |
-| ❌      | [Eventing](#eventing)           | React to state changes in the provider or flag management system.                                                                  |
-| ✅      | [Shutdown](#shutdown)           | Gracefully clean up a provider during application shutdown.                                                                        |
-| ⚠️      | [Extending](#extending)         | Extend OpenFeature with custom providers and hooks.                                                                                |
+| Status | Features                | Description                                                                                                                        |
+| ------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| ✅     | [Providers](#providers) | Integrate with a commercial, open source, or in-house feature management tool.                                                     |
+| ✅     | [Targeting](#targeting) | Contextually-aware flag evaluation using [evaluation context](https://openfeature.dev/docs/reference/concepts/evaluation-context). |
+| ❌     | [Hooks](#hooks)         | Add functionality to various stages of the flag evaluation life-cycle.                                                             |
+| ❌     | [Logging](#logging)     | Integrate with popular logging packages.                                                                                           |
+| ✅     | [Domains](#domains)     | Logically bind clients with providers.                                                                                             |
+| ❌     | [Eventing](#eventing)   | React to state changes in the provider or flag management system.                                                                  |
+| ✅     | [Shutdown](#shutdown)   | Gracefully clean up a provider during application shutdown.                                                                        |
+| ⚠️     | [Extending](#extending) | Extend OpenFeature with custom providers and hooks.                                                                                |
 
 <sub>Implemented: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
 
