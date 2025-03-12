@@ -3,7 +3,7 @@ version = "0.6.0"
 description = "The Gleam SDK for the OpenFeature specification."
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "horvathandris", repo = "openfeature-gleam-sdk" }
-gleam = ">= 1.0.0"
+gleam = ">= 1.4.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 

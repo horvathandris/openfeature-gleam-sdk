@@ -1,5 +1,6 @@
 import gleam/dict.{type Dict}
 import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -47,7 +48,7 @@ pub fn provider(from: Dict(String, Flag)) {
         from,
         default_value,
         evaluation_context,
-        dynamic.bool,
+        decode.bool,
       )
     },
     resolve_string_evaluation: fn(flag, default_value, evaluation_context) {
@@ -56,7 +57,7 @@ pub fn provider(from: Dict(String, Flag)) {
         from,
         default_value,
         evaluation_context,
-        dynamic.string,
+        decode.string,
       )
     },
     resolve_int_evaluation: fn(flag, default_value, evaluation_context) {
@@ -65,7 +66,7 @@ pub fn provider(from: Dict(String, Flag)) {
         from,
         default_value,
         evaluation_context,
-        dynamic.int,
+        decode.int,
       )
     },
     resolve_float_evaluation: fn(flag, default_value, evaluation_context) {
@@ -74,7 +75,7 @@ pub fn provider(from: Dict(String, Flag)) {
         from,
         default_value,
         evaluation_context,
-        dynamic.float,
+        decode.float,
       )
     },
     resolve_dynamic_evaluation: fn(flag, default_value, _evaluation_context) {
@@ -92,7 +93,7 @@ fn resolve_evaluation(
   flags: Dict(String, Flag),
   default_value: value,
   evaluation_context: EvaluationContext,
-  decoder: dynamic.Decoder(value),
+  decoder: decode.Decoder(value),
 ) -> ResolutionDetails(value) {
   inner_resolve(flag, flags, default_value, evaluation_context, decoder)
   |> result.unwrap(ResolutionError(
@@ -108,7 +109,7 @@ fn inner_resolve(
   flags: Dict(String, Flag),
   default_value: value,
   evaluation_context: EvaluationContext,
-  decoder: dynamic.Decoder(value),
+  decoder: decode.Decoder(value),
 ) {
   use found_flag <- result.map(dict.get(flags, flag))
   case found_flag.context_evaluator {
@@ -124,7 +125,7 @@ fn inner_resolve(
         Ok(val) ->
           case
             dynamic.from(val)
-            |> decoder
+            |> decode.run(decoder)
           {
             Ok(resolved_val) -> ResolutionSuccess(resolved_val, Static)
             Error(_) ->
@@ -153,11 +154,12 @@ fn evaluate_context_evaluator(
   context_evaluator evaluator: fn(EvaluationContext) ->
     ResolutionDetails(dynamic.Dynamic),
   evaluation_context context: EvaluationContext,
-  decoder decoder: dynamic.Decoder(value),
+  decoder decoder: decode.Decoder(value),
 ) -> ResolutionDetails(value) {
   let resolution_details = evaluator(context)
 
-  decoder(resolution_details.value)
+  resolution_details.value
+  |> decode.run(decoder)
   |> result.map(fn(val) {
     case resolution_details {
       ResolutionSuccess(_, reason) -> ResolutionSuccess(val, reason)

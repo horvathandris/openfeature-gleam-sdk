@@ -78,7 +78,7 @@ pub fn set_provider(provider: FeatureProvider) -> Result(Nil, Nil) {
     SetProvider(_, domain.Global, provider),
     timeout,
   )
-  |> result.nil_error
+  |> result.replace_error(Nil)
   |> result.flatten
 }
 
